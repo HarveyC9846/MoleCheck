@@ -4,18 +4,20 @@
 import os, numpy, pandas, PIL.Image, cv2, shutil
 from skimage import measure
 from matplotlib import pyplot as plot
-MaskedPath = "./Masked/"
-ColorizedPath = "./Colorized/"
+os.chdir(".\\History\\CropImage\\")
+MaskedPath    = ".\\Masked\\"
+ColorizedPath = ".\\Colorized\\"
 Search = os.listdir(MaskedPath)
 ##
 ##
 ##  Save path
-SavePath = "./Crop/"
+SavePath = ".\\Crop\\"
 if( os.path.exists(SavePath) ):
     shutil.rmtree(SavePath)
 os.makedirs(SavePath)
-
-# i = Search[0]
+##
+##
+##  i = Search[0]
 for i in Search:
     ##
     ##
