@@ -1,5 +1,6 @@
 # Byte-compiled / optimized / DLL files
 __pycache__/
+Result/
 *.py[cod]
 *$py.class
 
@@ -162,3 +163,33 @@ venv.bak/
 !/SplitTrain/HoldOut/Valid/Image/1/105003.jpg
 !/SplitTrain/HoldOut/Valid/Image/1/105004.jpg
 !/SplitTrain/HoldOut/Valid/Image/1/105005.jpg
+
+# TuneParameter
+/TuneParameter/Train/Image/0/*
+/TuneParameter/Train/Image/1/*
+/TuneParameter/Valid/Image/0/*
+/TuneParameter/Valid/Image/1/*
+!/TuneParameter/Train/Image/0/0.jpg
+!/TuneParameter/Train/Image/0/1.jpg
+!/TuneParameter/Train/Image/0/2.jpg
+!/TuneParameter/Train/Image/0/3.jpg
+!/TuneParameter/Train/Image/0/4.jpg
+!/TuneParameter/Train/Image/0/5.jpg
+!/TuneParameter/Train/Image/1/50000.jpg
+!/TuneParameter/Train/Image/1/50001.jpg
+!/TuneParameter/Train/Image/1/50002.jpg
+!/TuneParameter/Train/Image/1/50003.jpg
+!/TuneParameter/Train/Image/1/50004.jpg
+!/TuneParameter/Train/Image/1/50005.jpg
+!/TuneParameter/Valid/Image/0/100000.jpg
+!/TuneParameter/Valid/Image/0/100001.jpg
+!/TuneParameter/Valid/Image/0/100002.jpg
+!/TuneParameter/Valid/Image/0/100003.jpg
+!/TuneParameter/Valid/Image/0/100004.jpg
+!/TuneParameter/Valid/Image/0/100005.jpg
+!/TuneParameter/Valid/Image/1/105000.jpg
+!/TuneParameter/Valid/Image/1/105001.jpg
+!/TuneParameter/Valid/Image/1/105002.jpg
+!/TuneParameter/Valid/Image/1/105003.jpg
+!/TuneParameter/Valid/Image/1/105004.jpg
+!/TuneParameter/Valid/Image/1/105005.jpg
