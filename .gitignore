@@ -102,3 +102,26 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+
+# History
+/History/CropImage/Colorized/*
+/History/CropImage/Crop/*
+/History/CropImage/Masked/*
+!/History/CropImage/Colorized/U00f0af65856b1617b3f5c698d5ce721b-3maeebdv-201845191445.jpg
+!/History/CropImage/Colorized/U00f0af65856b1617b3f5c698d5ce721b-xfwga_uo-201846191446.jpg
+!/History/CropImage/Colorized/U0a1cf8adc1db12d159dc5fbdfd889e44-oi23xn5k-201812221512.jpg
+!/History/CropImage/Colorized/U0a4ce773e9d7b599989c88bb7e8b017b-d5znuso4-201804201104.jpg
+!/History/CropImage/Colorized/U0a4ce773e9d7b599989c88bb7e8b017b-u4fqjkw_-201803201103.jpg
+!/History/CropImage/Colorized/U0a4da004f76c67fe080cb198eeb5091d-99pxbmwl-201839211339.jpg
+!/History/CropImage/Crop/U00f0af65856b1617b3f5c698d5ce721b-3maeebdv-201845191445.jpg
+!/History/CropImage/Crop/U00f0af65856b1617b3f5c698d5ce721b-xfwga_uo-201846191446.jpg
+!/History/CropImage/Crop/U0a1cf8adc1db12d159dc5fbdfd889e44-oi23xn5k-201812221512.jpg
+!/History/CropImage/Crop/U0a4ce773e9d7b599989c88bb7e8b017b-d5znuso4-201804201104.jpg
+!/History/CropImage/Crop/U0a4ce773e9d7b599989c88bb7e8b017b-u4fqjkw_-201803201103.jpg
+!/History/CropImage/Crop/U0a4da004f76c67fe080cb198eeb5091d-99pxbmwl-201839211339.jpg
+!/History/CropImage/Masked/U00f0af65856b1617b3f5c698d5ce721b-3maeebdv-201845191445.png
+!/History/CropImage/Masked/U00f0af65856b1617b3f5c698d5ce721b-xfwga_uo-201846191446.png
+!/History/CropImage/Masked/U0a1cf8adc1db12d159dc5fbdfd889e44-oi23xn5k-201812221512.png
+!/History/CropImage/Masked/U0a4ce773e9d7b599989c88bb7e8b017b-d5znuso4-201804201104.png
+!/History/CropImage/Masked/U0a4ce773e9d7b599989c88bb7e8b017b-u4fqjkw_-201803201103.png
+!/History/CropImage/Masked/U0a4da004f76c67fe080cb198eeb5091d-99pxbmwl-201839211339.png
