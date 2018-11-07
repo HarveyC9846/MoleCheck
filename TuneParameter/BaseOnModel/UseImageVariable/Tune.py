@@ -22,7 +22,10 @@ import scikitplot
 from scikitplot.metrics import plot_confusion_matrix, plot_roc
 import matplotlib.pyplot as plot
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = '2'
-os.chdir(".\\TuneParameter\\")
+try:
+    os.chdir(".\\TuneParameter\\")
+except:
+    pass
 ##
 ##
 ##  Variable

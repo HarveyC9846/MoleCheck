@@ -4,7 +4,10 @@
 import os, numpy, pandas, PIL.Image, cv2, shutil
 from skimage import measure
 from matplotlib import pyplot as plot
-os.chdir(".\\History\\CropImage\\")
+try:
+    os.chdir(".\\History\\CropImage\\")
+except:
+    pass
 MaskedPath    = ".\\Masked\\"
 ColorizedPath = ".\\Colorized\\"
 Search = os.listdir(MaskedPath)

@@ -4,7 +4,10 @@
 import pandas, os, sklearn, PIL.Image, numpy, shutil
 from sklearn.model_selection import train_test_split, StratifiedKFold
 from keras.preprocessing.image import ImageDataGenerator
-os.chdir(".\\SplitTrain\\")
+try:
+    os.chdir(".\\SplitTrain\\")
+except:
+    pass
 SavePath = ".\\HoldOut\\"
 if( os.path.exists(SavePath) ):
     shutil.rmtree(SavePath)

@@ -4,7 +4,10 @@
 import os, numpy, pandas, PIL.Image, cv2, shutil
 from skimage import measure
 from matplotlib import pyplot as plot
-os.chdir(".\\History\\CleanTable\\")
+try:
+    os.chdir(".\\History\\CleanTable\\")
+except:
+    pass
 Table = pandas.read_csv('.\\Table.csv')
 ##
 ##
