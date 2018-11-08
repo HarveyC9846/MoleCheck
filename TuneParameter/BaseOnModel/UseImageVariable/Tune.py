@@ -37,7 +37,7 @@ VariableSize = len(Variable)
 ##
 ##
 ##  Resize
-Resize = (48, 48)
+Resize = (64, 64)
 ##
 ##
 ##  Train
@@ -89,8 +89,8 @@ Valid["Variable"] = Valid["Table"][Variable]
 ##
 ##  Parameter control
 Parameter = {}
-Parameter["Batch"] = [8,16]
-Parameter["Epoch"] = [2]
+Parameter["Batch"] = [2]
+Parameter["Epoch"] = [10]
 Parameter["LearnRate"] = [1e-3]
 Parameter["Optimizer"] = ["Adadelta"]
 Parameter = list(ParameterGrid(Parameter))
