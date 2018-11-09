@@ -89,8 +89,8 @@ Valid["Variable"] = Valid["Table"][Variable]
 ##
 ##  Parameter control
 Parameter = {}
-Parameter["Batch"] = [2]
-Parameter["Epoch"] = [10]
+Parameter["Batch"] = [1]
+Parameter["Epoch"] = [50]
 Parameter["LearnRate"] = [1e-3]
 Parameter["Optimizer"] = ["Adadelta"]
 Parameter = list(ParameterGrid(Parameter))
@@ -236,7 +236,6 @@ pandas.DataFrame(AASN).to_csv(ResultPath + Time + "\\AASN.csv", index=False)
 ##
 ##
 ##  Log
-Log = ""
-
+Log = "50000 train, 5000 valid, 64*64 image, variable and tune"
 with open(ResultPath + Time + "\\Message.txt", "w") as Message:
     Message.write(Log)
