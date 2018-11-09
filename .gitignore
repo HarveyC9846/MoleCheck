@@ -111,13 +111,9 @@ venv.bak/
 
 # SplitTrain
 /SplitTrain/Crop/*
-/SplitTrain/HoldOut/Train/Image/0/*
-/SplitTrain/HoldOut/Train/Image/1/*
-/SplitTrain/HoldOut/Valid/Image/0/*
-/SplitTrain/HoldOut/Valid/Image/1/*
+/SplitTrain/HoldOut/Train/Image/*
+/SplitTrain/HoldOut/Valid/Image/*
 
 # TuneParameter
-/TuneParameter/Train/Image/0/*
-/TuneParameter/Train/Image/1/*
-/TuneParameter/Valid/Image/0/*
-/TuneParameter/Valid/Image/1/*
+/TuneParameter/Train/Image/*
+/TuneParameter/Valid/Image/*
