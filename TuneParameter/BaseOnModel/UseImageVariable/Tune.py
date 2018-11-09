@@ -232,7 +232,6 @@ Evaluate["SPC"] = Evaluate["ConfuseTable"][1,1]/sum(Evaluate["ConfuseTable"][1,:
 Evaluate["NPV"] = Evaluate["ConfuseTable"][1,1]/sum(Evaluate["ConfuseTable"][:,1])
 AASN = {"Accuracy":[Evaluate["Accuracy"]], "AUC":[Evaluate["AUC"]], "SPC":[Evaluate["SPC"]], "NPV":[Evaluate["NPV"]]}
 pandas.DataFrame(AASN).to_csv(ResultPath + Time + "\\AASN.csv", index=False)
-
 ##
 ##
 ##  Log
