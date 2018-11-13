@@ -53,10 +53,6 @@ for i, d in Train["Table"].iterrows():
     iImage = numpy.array(iImage)
     iImage = iImage.astype("float32")
     iImage = iImage / 255
-    ##
-    ##
-    ##  Concatenate
-    # iImage = numpy.concatenate((iImage, aOriented), axis=2)
     Train["Image"].append(iImage)
 Train["Image"] = numpy.array(Train["Image"])
 Train["EncodeLabelCode"] = to_categorical(Train["Label"])
@@ -76,10 +72,6 @@ for i, d in Valid["Table"].iterrows():
     iImage = numpy.array(iImage)
     iImage = iImage.astype("float32")
     iImage = iImage / 255
-    ##
-    ##
-    ##  Concatenate
-    # iImage = numpy.concatenate((iImage, aOriented), axis=2)
     Valid["Image"].append(iImage)
 Valid["Image"] = numpy.array(Valid["Image"])
 Valid["EncodeLabelCode"] = to_categorical(Valid["Label"])
@@ -89,8 +81,8 @@ Valid["Variable"] = Valid["Table"][Variable]
 ##
 ##  Parameter control
 Parameter = {}
-Parameter["Batch"] = [1]
-Parameter["Epoch"] = [50]
+Parameter["Batch"] = [1,2,4,8]
+Parameter["Epoch"] = [25]
 Parameter["LearnRate"] = [1e-3]
 Parameter["Optimizer"] = ["Adadelta"]
 Parameter = list(ParameterGrid(Parameter))

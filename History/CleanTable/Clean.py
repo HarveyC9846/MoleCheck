@@ -11,6 +11,10 @@ except:
 Table = pandas.read_csv('.\\Table.csv')
 ##
 ##
+##  Select doctor
+Table = pandas.concat([Table.loc[Table.doctor=="Jack Li"], Table.loc[Table.doctor=="Eric Lin 林"], Table.loc[Table.doctor=="Christine(王筱涵)"]])
+##
+##
 ##  Group by "image1" and "image2"
 Table = Table[["user_id", "image1", "image2", "mole_size", "period", "change_1month", "gender", "age", "result"]]
 Part1 = Table[["user_id", "image1", "mole_size", "period", "change_1month", "gender", "age", "result"]]
