@@ -227,6 +227,6 @@ pandas.DataFrame(AASN).to_csv(ResultPath + Time + "\\AASN.csv", index=False)
 ##
 ##
 ##  Log
-Log = "50000 train, 5000 valid, 64*64 image, variable and tune"
+Log = "30000 train, original valid, 64*64 image, variable and tune."
 with open(ResultPath + Time + "\\Message.txt", "w") as Message:
     Message.write(Log)
