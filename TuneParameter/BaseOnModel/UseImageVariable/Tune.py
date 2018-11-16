@@ -81,8 +81,8 @@ Valid["Variable"] = Valid["Table"][Variable]
 ##
 ##  Parameter control
 Parameter = {}
-Parameter["Batch"] = [1,2,4,8]
-Parameter["Epoch"] = [25]
+Parameter["Batch"] = [1]
+Parameter["Epoch"] = [10]
 Parameter["LearnRate"] = [1e-3]
 Parameter["Optimizer"] = ["Adadelta"]
 Parameter = list(ParameterGrid(Parameter))
