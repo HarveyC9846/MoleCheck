@@ -219,11 +219,12 @@ ConfusionTable = plot_confusion_matrix(y_true = Valid["Label"], y_pred = Evaluat
 ConfusionTable.savefig(ResultPath + Time + "\\ConfusionTable.png")
 ##
 ##
-##  AASN
+##  AASNP
 Evaluate["SPC"] = Evaluate["ConfuseTable"][1,1]/sum(Evaluate["ConfuseTable"][1,:])
 Evaluate["NPV"] = Evaluate["ConfuseTable"][1,1]/sum(Evaluate["ConfuseTable"][:,1])
-AASN = {"Accuracy":[Evaluate["Accuracy"]], "AUC":[Evaluate["AUC"]], "SPC":[Evaluate["SPC"]], "NPV":[Evaluate["NPV"]]}
-pandas.DataFrame(AASN).to_csv(ResultPath + Time + "\\AASN.csv", index=False)
+Evaluate["PPV"] = Evaluate["ConfuseTable"][0,0]/sum(Evaluate["ConfuseTable"][:,0])
+AASNP = {"Accuracy":[Evaluate["Accuracy"]], "AUC":[Evaluate["AUC"]], "SPC":[Evaluate["SPC"]], "NPV":[Evaluate["NPV"]], "PPV":[Evaluate["PPV"]]}
+pandas.DataFrame(AASNP).to_csv(ResultPath + Time + "\\AASNP.csv", index=False)
 ##
 ##
 ##  Log

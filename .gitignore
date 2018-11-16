@@ -117,3 +117,6 @@ venv.bak/
 # TuneParameter
 /TuneParameter/Train/Image/*
 /TuneParameter/Valid/Image/*
+
+# Example
+/Example/*
