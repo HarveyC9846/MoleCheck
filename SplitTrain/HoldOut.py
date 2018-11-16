@@ -52,7 +52,7 @@ Train = pandas.concat(FakeTrainList)
 ##  Balance valid data
 BalanceValid = True
 if(BalanceValid):
-    ValidBalanceSize = 1000
+    ValidBalanceSize = 2500
     FakeValidList = []
     Class = list(Valid.Label.unique())
     for i in Class:

@@ -81,7 +81,7 @@ Valid["Variable"] = Valid["Table"][Variable]
 ##
 ##  Parameter control
 Parameter = {}
-Parameter["Batch"] = [1]
+Parameter["Batch"] = [1,2,4,8]
 Parameter["Epoch"] = [10]
 Parameter["LearnRate"] = [1e-3]
 Parameter["Optimizer"] = ["Adadelta"]
@@ -228,6 +228,6 @@ pandas.DataFrame(AASNP).to_csv(ResultPath + Time + "\\AASNP.csv", index=False)
 ##
 ##
 ##  Log
-Log = "30000 train, original valid, 64*64 image, variable and tune."
+Log = "30000 train, 5000 valid, 64*64 image, variable and tune."
 with open(ResultPath + Time + "\\Message.txt", "w") as Message:
     Message.write(Log)
