@@ -39,7 +39,7 @@ Train, Valid = train_test_split(Table, test_size = 0.3, stratify = Table.Label)
 ##
 ##
 ##  Balance train data
-TrainBalanceSize = 10000
+TrainBalanceSize = 15000
 Class = list(Train.Label.unique())
 FakeTrainList = []
 for i in Class:
@@ -50,7 +50,7 @@ Train = pandas.concat(FakeTrainList)
 ##
 ##
 ##  Balance valid data
-BalanceValid = True
+BalanceValid = False
 if(BalanceValid):
     ValidBalanceSize = 2500
     FakeValidList = []
@@ -111,4 +111,9 @@ Train = TrainValid.loc[TrainValid.Type == "Train"]
 Valid = TrainValid.loc[TrainValid.Type == "Valid"]
 Train.to_csv(SavePath + "Train/Table.csv", index = False)
 Valid.to_csv(SavePath + "Valid/Table.csv", index = False)
+##
+##
+##  Save label count
+Train[["Label", "Index"]].groupby("Label").count().rename(columns={"Index": "Count"}).to_csv(SavePath + "Train\\LabelCount.csv")
+Valid[["Label", "Index"]].groupby("Label").count().rename(columns={"Index": "Count"}).to_csv(SavePath + "Valid\\LabelCount.csv")
 print("Finish")
