@@ -21,7 +21,6 @@ from keras.models import load_model
 import scikitplot
 from scikitplot.metrics import plot_confusion_matrix, plot_roc
 import matplotlib.pyplot as plot
-sys.path.append(os.getcwd())
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = '2'
 try:
     os.chdir(".\\TuneParameter\\")
@@ -82,10 +81,10 @@ Valid["Variable"] = Valid["Table"][Variable]
 ##
 ##  Parameter control
 Parameter = {}
-Parameter["Batch"] = [1]
-Parameter["Epoch"] = [10]
+Parameter["Batch"] = [50]
+Parameter["Epoch"] = [1]
 Parameter["LearnRate"] = [1e-3]
-Parameter["Optimizer"] = ["Adadelta"]
+Parameter["Optimizer"] = ["Adadelta", "Adam"]
 Parameter = list(ParameterGrid(Parameter))
 ##
 ##
@@ -117,13 +116,20 @@ for p in Parameter:
     ##
     ##
     ##  Create model
-    from TuneParameter.BaseOnModel.UseImageVariable.Model import Model
+    from BaseOnModel.UseImageVariable.Model import Model
     model = Model.I2CLMV1FLO(ImageSize = Resize + (3,), VariableSize = VariableSize)
+    ##
+    ##
+    ##  Optimizer
+    if(p["Optimizer"]=="Adadelta"):
+        TheOptimizer =  keras.optimizers.Adadelta
+    if(p["Optimizer"]=="Adam"):
+        TheOptimizer =  keras.optimizers.Adam
     ##
     ##
     ##  Compile
     model.compile(loss=keras.losses.categorical_crossentropy,
-                  optimizer=keras.optimizers.Adadelta(lr=p["LearnRate"]),
+                  optimizer=TheOptimizer(lr=p["LearnRate"]),
                   metrics=["acc"])
     ##
     ##
@@ -229,6 +235,6 @@ pandas.DataFrame(AASNP).to_csv(ResultPath + Time + "\\AASNP.csv", index=False)
 ##
 ##
 ##  Log
-Log = "30000 train, 237 valid, 64*64 image, variable and tune."
+Log = "30000 train, 5000 valid, 64*64 image, variable and tune."
 with open(ResultPath + Time + "\\Message.txt", "w") as Message:
     Message.write(Log)

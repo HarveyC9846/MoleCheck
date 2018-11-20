@@ -50,7 +50,7 @@ Train = pandas.concat(FakeTrainList)
 ##
 ##
 ##  Balance valid data
-BalanceValid = False
+BalanceValid = True
 if(BalanceValid):
     ValidBalanceSize = 2500
     FakeValidList = []
