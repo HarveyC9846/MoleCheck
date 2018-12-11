@@ -81,10 +81,10 @@ Valid["Variable"] = Valid["Table"][Variable]
 ##
 ##  Parameter control
 Parameter = {}
-Parameter["Batch"] = [50]
-Parameter["Epoch"] = [1]
+Parameter["Batch"] = [2]
+Parameter["Epoch"] = [25]
 Parameter["LearnRate"] = [1e-3]
-Parameter["Optimizer"] = ["Adadelta", "Adam"]
+Parameter["Optimizer"] = ["Adadelta"]
 Parameter = list(ParameterGrid(Parameter))
 ##
 ##
@@ -136,7 +136,7 @@ for p in Parameter:
     ##  Fit.
     model.fit(
         [Train["Image"], Train["Variable"]], Train["EncodeLabelCode"],
-        # Train["Image"], Train["EncodeLabelCode"],
+        class_weight = {0:0.65, 1:0.35},
         batch_size=p["Batch"],
         epochs=p["Epoch"],
         verbose=1,
@@ -232,9 +232,10 @@ Evaluate["NPV"] = Evaluate["ConfuseTable"][1,1]/sum(Evaluate["ConfuseTable"][:,1
 Evaluate["PPV"] = Evaluate["ConfuseTable"][0,0]/sum(Evaluate["ConfuseTable"][:,0])
 AASNP = {"Accuracy":[Evaluate["Accuracy"]], "AUC":[Evaluate["AUC"]], "SPC":[Evaluate["SPC"]], "NPV":[Evaluate["NPV"]], "PPV":[Evaluate["PPV"]]}
 pandas.DataFrame(AASNP).to_csv(ResultPath + Time + "\\AASNP.csv", index=False)
+pandas.DataFrame(AASNP)
 ##
 ##
 ##  Log
-Log = "30000 train, 5000 valid, 64*64 image, variable and tune."
+Log = "10000 train, 3000 valid, 64*64 image, variable and tune."
 with open(ResultPath + Time + "\\Message.txt", "w") as Message:
     Message.write(Log)

@@ -35,11 +35,12 @@ LabelCount.to_csv(".\\LabelCount.csv")
 ##
 ##
 ##  Split by hold out
+numpy.random.seed(2018)
 Train, Valid = train_test_split(Table, test_size = 0.3, stratify = Table.Label)
 ##
 ##
 ##  Balance train data
-TrainBalanceSize = 15000
+TrainBalanceSize = 5000
 Class = list(Train.Label.unique())
 FakeTrainList = []
 for i in Class:
@@ -52,7 +53,7 @@ Train = pandas.concat(FakeTrainList)
 ##  Balance valid data
 BalanceValid = True
 if(BalanceValid):
-    ValidBalanceSize = 2500
+    ValidBalanceSize = 1500
     FakeValidList = []
     Class = list(Valid.Label.unique())
     for i in Class:
