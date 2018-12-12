@@ -2,7 +2,6 @@
 ##
 ##
 ##  Load
-from sklearn.model_selection import ParameterGrid
 import os
 import pandas
 import PIL
@@ -10,19 +9,22 @@ import numpy, datetime
 import keras
 import tensorflow
 import pdb
-from keras.utils import to_categorical
-from sklearn.metrics import accuracy_score, roc_curve, auc, roc_auc_score, confusion_matrix
-from keras import backend
 import sys
 import re
 import datetime
-from skimage.feature import hog
-from keras.models import load_model
 import scikitplot
-from scikitplot.metrics import plot_confusion_matrix, plot_roc
 import matplotlib.pyplot as plot
 import torch
 import torch.utils.data
+from sklearn.model_selection import ParameterGrid
+from keras.utils import to_categorical
+from sklearn.metrics import accuracy_score, roc_curve, auc, roc_auc_score, confusion_matrix
+from keras import backend
+from skimage.feature import hog
+from keras.models import load_model
+from scikitplot.metrics import plot_confusion_matrix, plot_roc
+from torch.nn import *
+from torch.optim import *
 try:
     os.chdir(".\\TuneParameter\\")
 except:
@@ -30,15 +32,13 @@ except:
 ##
 ##
 ##  Define model
-from torch.nn import *
-from torch.optim import *
 class DefineModel(Module):
-    def __init__(self):
+    def __init__(self, ImageSize, VariableSize, Class):
         super(DefineModel, self).__init__()
         self.The1stConv  = Conv2d(in_channels= 3, out_channels=32, kernel_size=(3,3), stride=(1,1), padding=1)
         self.The2ndConv  = Conv2d(in_channels=32, out_channels=64, kernel_size=(3,3), stride=(1,1), padding=1)
-        self.The1stFully = Linear(in_features=16+(64*64*64), out_features=1000, bias=True)
-        self.The2ndFully = Linear(in_features=    1000, out_features=  2, bias=True)
+        self.The1stFully = Linear(in_features=VariableSize+(ImageSize[0]*ImageSize[1]*64), out_features=1000, bias=True)
+        self.The2ndFully = Linear(in_features=    1000, out_features=  Class, bias=True)
         self.Softmax     = Softmax(dim=1)
         self.ReLu        = ReLU()
         self.sigmoid     = Sigmoid()
@@ -62,6 +62,7 @@ Variable = ["OverSize_N", "OverSize_Y", "Period_Month",
  "Period_OverYear", "Period_Unknown", "Period_Year", "Change_N","Change_Unknown",
  "Change_Y", "Gender_F", "Gender_M","Gender_N","Age_Middle",
  "Age_Old","Age_Teen","Age_Youth"]
+VariableSize = len(Variable)
 ##
 ##
 ##  Resize
@@ -107,27 +108,33 @@ TrainImageTerm = torch.from_numpy(TrainImage.reshape((TrainImage.shape[0], Train
 ValidImageTerm = torch.from_numpy(ValidImage.reshape((ValidImage.shape[0], ValidImage.shape[3]) + ValidImage.shape[1:3])).type(torch.FloatTensor)
 TrainVariableTerm = torch.from_numpy(numpy.array(TrainVariable)).type(torch.FloatTensor)
 ValidVariableTerm = torch.from_numpy(numpy.array(ValidVariable)).type(torch.FloatTensor)
-TrainLabelCode = torch.from_numpy(numpy.array(TrainLabel)).type("torch.LongTensor").view(-1)
-ValidLabelCode = torch.from_numpy(numpy.array(ValidLabel)).type("torch.LongTensor").view(-1)
-TrainSet = torch.utils.data.TensorDataset(TrainImageTerm, TrainVariableTerm, TrainLabelCode)
-ValidSet = torch.utils.data.TensorDataset(ValidImageTerm, ValidVariableTerm, ValidLabelCode)
+TrainLabelCodeTerm = torch.from_numpy(numpy.array(TrainLabel)).type("torch.LongTensor").view(-1)
+ValidLabelCodeTerm = torch.from_numpy(numpy.array(ValidLabel)).type("torch.LongTensor").view(-1)
+TrainSet = torch.utils.data.TensorDataset(TrainImageTerm, TrainVariableTerm, TrainLabelCodeTerm)
+ValidSet = torch.utils.data.TensorDataset(ValidImageTerm, ValidVariableTerm, ValidLabelCodeTerm)
 ################################################################################
 ##
 ##
+##  Tune result
+TuneTable = {"Batch":[], "Optimizer":[], "LearnRate":[], "Epoch":[], "Accuracy":[], "Auc":[], "Loss":[]}
+BetterModel = []
+##
+##
 ##  Parameter
-Parameter    = {"Batch" : [32, 64], "Optimizer": ["Adadelta", "Adam"], "LearnRate": [0.001, 0.0001], "Epoch": [20, 40]}
+Parameter    = {"Batch" : [1, 2, 4, 32, 64], "Optimizer": ["Adadelta", "Adam"], "LearnRate": [0.001, 0.0001], "Epoch": [20, 40]}
 ParameterSet = ParameterGrid(Parameter)
 for p in ParameterSet:
-    break
     ##
     ##
     ##  Load model
-    Model = DefineModel()
+    Model = DefineModel(ImageSize=(64,64,3), VariableSize=16, Class=2)
     ##
     ##
     ##  Optimizer
     if( p["Optimizer"] == 'Adadelta' ):
         Optimizer = torch.optim.Adadelta(Model.parameters(), lr = p["LearnRate"])
+    if( p["Optimizer"] == 'Adam' ):
+        Optimizer = torch.optim.Adam(Model.parameters(), lr = p["LearnRate"])
     ##
     ##
     ##  Loss
@@ -135,89 +142,80 @@ for p in ParameterSet:
     ##
     ##
     ##  Epoch
-    ValidEpochLoss     = []
-    ValidEpochAccuracy = []
     for EpochIndex in range(p["Epoch"]):
+        ##
+        ##
+        ##  Batch
         TrainBatchSet = torch.utils.data.DataLoader(TrainSet, batch_size=p["Batch"], shuffle=True)
         ValidBatchSet = torch.utils.data.DataLoader(ValidSet, batch_size=p["Batch"], shuffle=True)
-        for OneTrainBatchIndex, OneTrainBatch in enumerate(TrainBatchSet):
+        for TrainMinBatchIndex, TrainMinBatch in enumerate(TrainBatchSet):
             ##
             ##
             ##  Inital gradient
             Optimizer.zero_grad()
-            OneTrainBatchScore = Model.cuda()(OneTrainBatch[0].cuda(), OneTrainBatch[1].cuda())
-            OneTrainBatchLoss  = LossFunction(OneTrainBatchScore, OneTrainBatch[2].cuda())
+            TrainMinBatchScore = Model.cuda()(TrainMinBatch[0].cuda(), TrainMinBatch[1].cuda())
+            TrainMinBatchLoss  = LossFunction(TrainMinBatchScore, TrainMinBatch[2].cuda())
             ##
             ##
             ##  Update gradient
-            OneTrainBatchLoss.backward()
+            TrainMinBatchLoss.backward()
             Optimizer.step()
+            ##
+            ##
+            ##  End min batch
+            pass
         ##
         ##
-        ##  Check valid data
-        with torch.no_grad():
-            ValidNumber        = 0
-            ValidAccurateCount = 0
-            ValidTotalLoss     = 0
-            for OneValidBatchIndex, OneValidBatch in enumerate(ValidBatchSet):
-                OneValidBatchNumber          = OneValidBatch[0].size()[0]
-                OneValidBatchScore           = Model.cuda()(OneValidBatch[0].cuda(), OneValidBatch[1].cuda())
-                OneValidBatchLoss            = LossFunction(OneValidBatchScore, OneValidBatch[2].cuda())
-                _, OneValidBatchPrediction   = torch.max(OneValidBatchScore, 1)
-                OneValidBatchAccuracy        = accuracy_score(OneValidBatch[2], numpy.array(OneValidBatchPrediction))
-                ValidAccurateCount           = ValidAccurateCount + (OneValidBatchAccuracy * OneValidBatchNumber)
-                ValidTotalLoss               = ValidTotalLoss     + (OneValidBatchNumber * OneValidBatchLoss)
-                ValidNumber                  = ValidNumber        + OneValidBatchNumber
-            ValidEpochLoss.append(float(ValidTotalLoss) / ValidNumber)
-            ValidEpochAccuracy.append(ValidAccurateCount / ValidNumber)
-ValidEpochLoss
-ValidEpochAccuracy
+        ##  End epoch
+        pass
+    ##
+    ##
+    ##  Check valid data when finish all epoch
+    with torch.no_grad():
+        ValidNumber        = 0
+        ValidAnswer        = []
+        ValidPredictScore  = []
+        for ValidMinBatchIndex, ValidMinBatch in enumerate(ValidBatchSet):
+            ValidMinBatchScore  = Model.cuda()(ValidMinBatch[0].cuda(), ValidMinBatch[1].cuda())
+            ValidNumber         = ValidNumber + ValidMinBatch[0].size()[0]
+            ValidAnswer.append(ValidMinBatch[2])
+            ValidPredictScore.append(ValidMinBatchScore)
+    ##
+    ##
+    ##  Together tensor
+    ValidAnswer          = torch.cat(ValidAnswer, dim=0)
+    ValidPredictScore    = torch.cat(ValidPredictScore, dim=0)
+    ValidLoss            = LossFunction(ValidPredictScore.cpu(), ValidAnswer.cpu())
+    _, ValidPredictClass = torch.max(ValidPredictScore,1)
+    ##
+    ##
+    ##  Summary statistics to tune result
+    ValidLoss = float(ValidLoss)
+    ValidAccuracy = accuracy_score(ValidAnswer, ValidPredictClass)
+    ValidAuc = roc_auc_score(ValidAnswer, ValidPredictScore[:,1])
+    ##
+    ##
+    ##  Choose model
+    TheModelScore = ValidAuc
+    if( not BetterModel ):
+        BetterModel = Model
+        BetterModelScore = TheModelScore
+    else:
+        if(BetterModelScore < TheModelScore):
+            BetterModel = Model
+            BetterModelScore = TheModelScore
+    ##
+    ##
+    ##  Tune result
+    TuneTable["Batch"].append(p["Batch"])
+    TuneTable["Optimizer"].append(p["Optimizer"])
+    TuneTable["LearnRate"].append(p["LearnRate"])
+    TuneTable["Epoch"].append(p["Epoch"])
+    TuneTalbe["Loss"].append(ValidLoss)
+    TuneTable["Accuracy"].append(ValidAccuracy)
+    TuneTable["Auc"].append(ValidAuc)
+    print("Finish a parameter tune.")
 ################################################################################
-##
-##
-##  Epoch
-# Epoch = 20
-# for EpochIndex in range(Epoch):
-#     TrainBatchSet = torch.utils.data.DataLoader(TrainSet, batch_size=32, shuffle=True)
-#     ##
-#     ##
-#     ##  Batch total
-#     BatchTotal = {"Size" : 0, "Loss" : 0, "AccurateCount" : 0}
-#     for OneTrainBatchIndex, OneTrainBatch in enumerate(TrainBatchSet):
-#         ##
-#         ##
-#         ##  Inital gradient
-#         Optimizer.zero_grad()
-#         OneTrainBatchScore = Model.cuda()(OneTrainBatch[0].cuda(), OneTrainBatch[1].cuda())
-#         OneTrainBatchLoss  = LossFunction(OneTrainBatchScore, OneTrainBatch[2].cuda())
-#         ##
-#         ##
-#         ##  Update gradient
-#         OneTrainBatchLoss.backward()
-#         Optimizer.step()
-#         ##
-#         ##
-#         ##  Accuracy
-#         _, OnePrediction   = torch.max(OneTrainBatchScore, 1)
-#         OneAccuracy        = accuracy_score(OneTrainBatch[2], numpy.array(OnePrediction))
-#         BatchTotal["Size"] = BatchTotal["Size"] + OneTrainBatch[0].size()[0]
-#         BatchTotal["Loss"] = BatchTotal["Loss"] + float((OneTrainBatchLoss * OneTrainBatch[0].size()[0]))
-#         BatchTotal["AccurateCount"] = BatchTotal["AccurateCount"] + OneAccuracy * OneTrainBatch[0].size()[0]
-#         # print("Epoch:", EpochIndex,  "Loss:", float(OneTrainBatchLoss), "Accuracy:", float(OneAccuracy), end='\r')
-#     ##
-#     ##
-#     ##  Epoch log
-#     EpochTrainLoss = BatchTotal["Loss"]/BatchTotal["Size"]
-#     EpochTrainAccuracy = BatchTotal["AccurateCount"]/BatchTotal["Size"]
-#     print("")
-#     print("TrainLoss: %s, TrainAccuracy: %s" % (EpochTrainLoss,EpochTrainAccuracy))
-#
-# ################################################################################
-# ValidBatchSet = torch.utils.data.DataLoader(ValidSet, batch_size=5000, shuffle=False)
-#
-# with torch.no_grad():
-#
-#     Model.cuda()(ValidSet[0].cuda(), ValidSet[1].cuda())
-#
-#
-# ValidSet[0]
+pandas.DataFrame(TuneTable)
+################################################################################
+################################################################################
