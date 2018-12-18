@@ -6,8 +6,6 @@ import os
 import pandas
 import PIL
 import numpy, datetime
-import keras
-import tensorflow
 import pdb
 import sys
 import re
@@ -17,14 +15,12 @@ import matplotlib.pyplot as plot
 import torch
 import torch.utils.data
 from sklearn.model_selection import ParameterGrid
-from keras.utils import to_categorical
 from sklearn.metrics import accuracy_score, roc_curve, auc, roc_auc_score, confusion_matrix
-from keras import backend
 from skimage.feature import hog
-from keras.models import load_model
 from scikitplot.metrics import plot_confusion_matrix, plot_roc
 from torch.nn import *
 from torch.optim import *
+import time
 try:
     os.chdir(".\\TuneParameter\\")
 except:
@@ -115,15 +111,33 @@ ValidSet = torch.utils.data.TensorDataset(ValidImageTerm, ValidVariableTerm, Val
 ################################################################################
 ##
 ##
-##  Tune result
-TuneTable = {"Batch":[], "Optimizer":[], "LearnRate":[], "Epoch":[], "Accuracy":[], "Auc":[], "Loss":[]}
-BetterModel = []
+##  Tune table
+TuneTable       = {"Batch":[], "Optimizer":[], "LearnRate":[], "Epoch":[], "Accuracy":[], "Auc":[], "Loss":[]}
+##
+##
+##  Tune better model
+TuneBetterModel = []
+##
+##
+##  Tune result path
+TuneResultPath = "BaseOnModel\\UseImageVariable\\UsePytorch\\Result\\" + str.split(str(time.time()), ".")[0] + "\\"
+try:
+    os.makedirs(TuneResultPath)
+except:
+    pass
+################################################################################
 ##
 ##
 ##  Parameter
-Parameter    = {"Batch" : [1, 2, 4, 32, 64], "Optimizer": ["Adadelta", "Adam"], "LearnRate": [0.001, 0.0001], "Epoch": [20, 40]}
+Parameter    = {"Batch" : [2, 4, 8, 32, 64], "Optimizer": ["Adam", "Adadelta"], "LearnRate": [0.001, 0.0001], "Epoch": [50]}
 ParameterSet = ParameterGrid(Parameter)
 for p in ParameterSet:
+    ##
+    ##
+    ##  Deterministic result
+    torch.manual_seed(60)
+    torch.cuda.manual_seed(60)
+    torch.backends.cudnn.deterministic = True
     ##
     ##
     ##  Load model
@@ -182,40 +196,75 @@ for p in ParameterSet:
             ValidPredictScore.append(ValidMinBatchScore)
     ##
     ##
-    ##  Together tensor
+    ##  Complete valid data check
     ValidAnswer          = torch.cat(ValidAnswer, dim=0)
     ValidPredictScore    = torch.cat(ValidPredictScore, dim=0)
     ValidLoss            = LossFunction(ValidPredictScore.cpu(), ValidAnswer.cpu())
     _, ValidPredictClass = torch.max(ValidPredictScore,1)
     ##
     ##
-    ##  Summary statistics to tune result
-    ValidLoss = float(ValidLoss)
+    ##  Custom statistics
+    ValidLoss     = float(ValidLoss)
     ValidAccuracy = accuracy_score(ValidAnswer, ValidPredictClass)
-    ValidAuc = roc_auc_score(ValidAnswer, ValidPredictScore[:,1])
+    ValidAuc      = roc_auc_score(ValidAnswer, ValidPredictScore[:,1])
     ##
     ##
     ##  Choose model
-    TheModelScore = ValidAuc
-    if( not BetterModel ):
-        BetterModel = Model
-        BetterModelScore = TheModelScore
+    TuneModelScore = ValidAccuracy
+    if( not TuneBetterModel ):
+        TuneBetterModel      = Model.cpu()
+        TuneBetterModelScore = TuneModelScore
     else:
-        if(BetterModelScore < TheModelScore):
-            BetterModel = Model
-            BetterModelScore = TheModelScore
+        if(TuneBetterModelScore < TuneModelScore):
+            TuneBetterModel      = Model.cpu()
+            TuneBetterModelScore = TuneModelScore
     ##
     ##
-    ##  Tune result
+    ##  Tune table
     TuneTable["Batch"].append(p["Batch"])
     TuneTable["Optimizer"].append(p["Optimizer"])
     TuneTable["LearnRate"].append(p["LearnRate"])
     TuneTable["Epoch"].append(p["Epoch"])
-    TuneTalbe["Loss"].append(ValidLoss)
+    TuneTable["Loss"].append(ValidLoss)
     TuneTable["Accuracy"].append(ValidAccuracy)
     TuneTable["Auc"].append(ValidAuc)
     print("Finish a parameter tune.")
+##
+##
+##  Tune table
+TuneTable = pandas.DataFrame(TuneTable)
+TuneTable.to_csv(TuneResultPath + "\\TuneTable.csv")
 ################################################################################
-pandas.DataFrame(TuneTable)
-################################################################################
-################################################################################
+##
+##
+##  Tune better model forward on valid
+with torch.no_grad():
+    ReportValidNumber        = 0
+    ReportValidAnswer        = []
+    ReportValidPredictScore  = []
+    for ValidMinBatchIndex, ValidMinBatch in enumerate(ValidBatchSet):
+        ValidMinBatchScore  = TuneBetterModel(ValidMinBatch[0].cpu(), ValidMinBatch[1].cpu())
+        ##
+        ##
+        ##  Together
+        ReportValidNumber   = ReportValidNumber + ValidMinBatch[0].size()[0]
+        ReportValidAnswer.append(ValidMinBatch[2])
+        ReportValidPredictScore.append(ValidMinBatchScore)
+##
+##
+##  Valid information
+ReportValidAnswer            = torch.cat(ReportValidAnswer, dim = 0)
+ReportValidPredictScore      = torch.cat(ReportValidPredictScore, dim = 0)
+_, ReportValidPredictClass   = torch.max(ReportValidPredictScore,1)
+ReportValidAccuracy          = accuracy_score(ReportValidAnswer, ReportValidPredictClass)
+##
+##
+##  Confust matrix
+ReportValidConfuseMatrix     = confusion_matrix(ReportValidAnswer, ReportValidPredictClass)
+ConfusionTable = plot_confusion_matrix(y_true = ReportValidAnswer, y_pred = ReportValidPredictClass).get_figure()
+ConfusionTable.savefig(TuneResultPath + "\\ConfusionTable.png")
+##
+##
+##  Roc curve and auc
+AUC = plot_roc(y_true=ReportValidAnswer, y_probas=ReportValidPredictScore, plot_micro=False, plot_macro=False, classes_to_plot=[1]).get_figure()
+AUC.savefig(TuneResultPath + "\\AUC.png")
