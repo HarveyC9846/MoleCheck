@@ -21,6 +21,7 @@ from scikitplot.metrics import plot_confusion_matrix, plot_roc
 from torch.nn import *
 from torch.optim import *
 import time
+import timeit
 try:
     os.chdir(".\\TuneParameter\\")
 except:
@@ -128,8 +129,12 @@ except:
 ################################################################################
 ##
 ##
+##  Initial run time
+TimeStart = timeit.default_timer()
+##
+##
 ##  Parameter
-Parameter    = {"Batch" : [2, 4, 8, 32, 64], "Optimizer": ["Adam", "Adadelta"], "LearnRate": [0.001, 0.0001], "Epoch": [50]}
+Parameter    = {"Batch" : [4], "Optimizer": ["Adam"], "LearnRate": [0.0001], "Epoch": [20]}
 ParameterSet = ParameterGrid(Parameter)
 for p in ParameterSet:
     ##
@@ -149,10 +154,13 @@ for p in ParameterSet:
         Optimizer = torch.optim.Adadelta(Model.parameters(), lr = p["LearnRate"])
     if( p["Optimizer"] == 'Adam' ):
         Optimizer = torch.optim.Adam(Model.parameters(), lr = p["LearnRate"])
+    if( p["Optimizer"] == 'SGD' ):
+        Optimizer = torch.optim.SGD(Model.parameters(), lr = p["LearnRate"])
     ##
     ##
     ##  Loss
-    LossFunction = torch.nn.CrossEntropyLoss()
+    ClassWeight = torch.tensor([0.2, 0.8])
+    LossFunction = torch.nn.CrossEntropyLoss(ClassWeight)
     ##
     ##
     ##  Epoch
@@ -168,7 +176,7 @@ for p in ParameterSet:
             ##  Inital gradient
             Optimizer.zero_grad()
             TrainMinBatchScore = Model.cuda()(TrainMinBatch[0].cuda(), TrainMinBatch[1].cuda())
-            TrainMinBatchLoss  = LossFunction(TrainMinBatchScore, TrainMinBatch[2].cuda())
+            TrainMinBatchLoss  = LossFunction.cuda()(TrainMinBatchScore, TrainMinBatch[2].cuda())
             ##
             ##
             ##  Update gradient
@@ -199,7 +207,7 @@ for p in ParameterSet:
     ##  Complete valid data check
     ValidAnswer          = torch.cat(ValidAnswer, dim=0)
     ValidPredictScore    = torch.cat(ValidPredictScore, dim=0)
-    ValidLoss            = LossFunction(ValidPredictScore.cpu(), ValidAnswer.cpu())
+    ValidLoss            = LossFunction.cpu()(ValidPredictScore.cpu(), ValidAnswer.cpu())
     _, ValidPredictClass = torch.max(ValidPredictScore,1)
     ##
     ##
@@ -231,7 +239,7 @@ for p in ParameterSet:
     print("Finish a parameter tune.")
 ##
 ##
-##  Tune table
+##  Inital tune table
 TuneTable = pandas.DataFrame(TuneTable)
 TuneTable.to_csv(TuneResultPath + "\\TuneTable.csv")
 ################################################################################
@@ -268,3 +276,31 @@ ConfusionTable.savefig(TuneResultPath + "\\ConfusionTable.png")
 ##  Roc curve and auc
 AUC = plot_roc(y_true=ReportValidAnswer, y_probas=ReportValidPredictScore, plot_micro=False, plot_macro=False, classes_to_plot=[1]).get_figure()
 AUC.savefig(TuneResultPath + "\\AUC.png")
+##
+##
+##  Report valid table
+Accuracy = (ReportValidConfuseMatrix[0,0] + ReportValidConfuseMatrix[1,1])/numpy.sum(ReportValidConfuseMatrix)
+NPV = ReportValidConfuseMatrix[0,0] / sum(ReportValidConfuseMatrix[:,0])
+PPV = ReportValidConfuseMatrix[1,1] / sum(ReportValidConfuseMatrix[:,1])
+Specificity = ReportValidConfuseMatrix[0,0] / sum(ReportValidConfuseMatrix[0,:])
+Sensitivity = ReportValidConfuseMatrix[1,1] / sum(ReportValidConfuseMatrix[1,:])
+ReportValidTable = pandas.DataFrame({"Accuracy":[Accuracy],"PPV":[PPV], "NPV":[NPV], "Sensitivity":[Sensitivity],"Specificity":[Specificity]})
+ReportValidTable.to_csv(TuneResultPath + "\\ReportValidTable.csv", index = False)
+##
+##
+##  Check run time
+TimeStop = timeit.default_timer()
+print('Run time: ', TimeStop - TimeStart)
+TuneTable
+ReportValidTable
+
+
+
+
+
+
+ValidSet[0][1]
+ValidSet[0][2]
+Model.eval()
+
+Model(ValidSet[0][0], ValidSet[0][1])
