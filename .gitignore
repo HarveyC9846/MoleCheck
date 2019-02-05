@@ -104,19 +104,9 @@ venv.bak/
 # mypy
 .mypy_cache/
 
-# History
-/History/CropImage/Colorized/*
-/History/CropImage/Crop/*
-/History/CropImage/Masked/*
-
-# SplitTrain
-/SplitTrain/Crop/*
-/SplitTrain/HoldOut/Train/Image/*
-/SplitTrain/HoldOut/Valid/Image/*
-
-# TuneParameter
-/TuneParameter/Train/Image/*
-/TuneParameter/Valid/Image/*
-
-# Example
-*Result
+#
+Clean/Data/
+Balance/Fold/
+Balance/Holdout/
+*Output/
+ValidationSet/Image/
